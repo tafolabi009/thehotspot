@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand Colors */
+  --color-hotpot-red: #E60000;
+  --color-hotpot-charcoal: #1A1A1A;
+  --color-hotpot-orange: #FF7A00;
+  --color-hotpot-orange-light: #FFA940;
+  --color-hotpot-charcoal-light: #2A2A2A;
+  
+  /* Custom Animations */
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-glow: glow 2s ease-in-out infinite alternate;
+  --animate-slide-up: slideUp 0.6s ease-out forwards;
+  --animate-slide-in: slideIn 0.6s ease-out forwards;
+  --animate-fade-in: fadeIn 0.8s ease-out forwards;
+  --animate-scale-in: scaleIn 0.5s ease-out forwards;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 20px rgba(255, 122, 0, 0.5); }
+  100% { box-shadow: 0 0 40px rgba(255, 122, 0, 0.8), 0 0 60px rgba(230, 0, 0, 0.4); }
+}
+
+@keyframes slideUp {
+  0% { transform: translateY(100px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideIn {
+  0% { transform: translateX(-100px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+}
+
+body {
+  background-color: #1A1A1A;
+  color: white;
+  overflow-x: hidden;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* Scroll snap for sections */
+section {
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
+}
+
+/* Custom gradient backgrounds */
+.gradient-overlay {
+  background: linear-gradient(135deg, rgba(230, 0, 0, 0.1) 0%, rgba(255, 122, 0, 0.1) 100%);
+}
+
+.glow-orange {
+  box-shadow: 0 0 20px rgba(255, 122, 0, 0.5), 0 0 40px rgba(255, 122, 0, 0.3);
+}
+
+.glow-red {
+  box-shadow: 0 0 20px rgba(230, 0, 0, 0.5), 0 0 40px rgba(230, 0, 0, 0.3);
+}
+
+.text-glow {
+  text-shadow: 0 0 20px rgba(255, 122, 0, 0.6), 0 0 40px rgba(255, 122, 0, 0.4);
+}
