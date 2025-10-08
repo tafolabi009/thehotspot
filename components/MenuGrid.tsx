@@ -17,6 +17,115 @@ interface MenuItem {
   popular?: boolean;
 }
 
+// Separate component for each menu card to avoid conditional hooks
+interface MenuCardProps {
+  item: MenuItem;
+  index: number;
+  inView: boolean;
+  addToCart: (item: MenuItem) => void;
+}
+
+function MenuCard({ item, index, inView, addToCart }: MenuCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [10, -10]), { damping: 25, stiffness: 200 });
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-10, 10]), { damping: 25, stiffness: 200 });
+
+  const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const xPct = (e.clientX - centerX) / (rect.width / 2);
+    const yPct = (e.clientY - centerY) / (rect.height / 2);
+    mouseX.set(xPct);
+    mouseY.set(yPct);
+  };
+
+  const handleCardMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
+
+  return (
+    <motion.div
+      key={item.id}
+      ref={cardRef}
+      onMouseMove={handleCardMouseMove}
+      onMouseLeave={handleCardMouseLeave}
+      initial={{ opacity: 0, y: 50 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ delay: index * 0.1, duration: 0.6 }}
+      className="group relative bg-hotpot-charcoal-light rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-500"
+      style={{
+        rotateX,
+        rotateY,
+        transformStyle: 'preserve-3d',
+      }}
+      whileHover={{ y: -10, scale: 1.02 }}
+    >
+      {/* Popular Badge */}
+      {item.popular && (
+        <div className="absolute top-4 right-4 z-20 bg-hotpot-red text-white px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg">
+          Popular
+        </div>
+      )}
+
+      {/* Image Container with Gradient Overlay */}
+      <div className="relative h-64 overflow-hidden bg-gradient-to-br from-hotpot-charcoal to-hotpot-charcoal-light">
+        <div className="absolute inset-0 bg-gradient-to-t from-hotpot-charcoal via-transparent to-transparent z-10"></div>
+        <motion.div
+          className="w-full h-full flex items-center justify-center text-6xl"
+          whileHover={{ scale: 1.1, rotate: 5 }}
+          transition={{ duration: 0.5 }}
+        >
+          {/* Placeholder - Replace with actual images */}
+          <div className="text-hotpot-orange opacity-50">🍲</div>
+        </motion.div>
+      </div>
+
+      {/* Content */}
+      <div className="p-6 relative">
+        <div className="flex justify-between items-start mb-3">
+          <h3 className="text-2xl font-bold text-white group-hover:text-hotpot-orange transition-colors duration-300">
+            {item.name}
+          </h3>
+          <span className="text-hotpot-orange text-xl font-bold whitespace-nowrap ml-4">
+            {item.price}
+          </span>
+        </div>
+        
+        <p className="text-gray-400 mb-4 text-sm leading-relaxed">
+          {item.description}
+        </p>
+
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-hotpot-orange-light uppercase tracking-wider font-semibold">
+            {item.category}
+          </span>
+          
+          <motion.button
+            onClick={() => addToCart(item)}
+            className="bg-hotpot-orange text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-hotpot-red transition-colors duration-300 shadow-lg"
+            whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(255, 122, 0, 0.6)' }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Add to Cart 🔥
+          </motion.button>
+        </div>
+      </div>
+
+      {/* Hover Glow Effect */}
+      <motion.div
+        className="absolute inset-0 border-2 border-hotpot-orange opacity-0 group-hover:opacity-100 rounded-3xl pointer-events-none transition-opacity duration-500"
+        style={{ boxShadow: '0 0 30px rgba(255, 122, 0, 0.3)' }}
+      />
+    </motion.div>
+  );
+}
+
 const menuItems: MenuItem[] = [
   { id: 1, name: 'Egusi Soup', category: 'Soups', description: 'Rich melon seed soup with assorted meat', price: '₦3,500', image: '/images/egusi.jpg', popular: true },
   { id: 2, name: 'Jollof Rice', category: 'Rice', description: 'Smoky party jollof with chicken', price: '₦2,500', image: '/images/jollof.jpg', popular: true },
@@ -177,106 +286,15 @@ export default function MenuGrid() {
 
         {/* Menu Grid */}
         <div ref={ref} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredItems.map((item, index) => {
-            const cardRef = useRef<HTMLDivElement>(null);
-            const mouseX = useMotionValue(0);
-            const mouseY = useMotionValue(0);
-            
-            const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [10, -10]), { damping: 25, stiffness: 200 });
-            const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-10, 10]), { damping: 25, stiffness: 200 });
-
-            const handleCardMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-              if (!cardRef.current) return;
-              const rect = cardRef.current.getBoundingClientRect();
-              const centerX = rect.left + rect.width / 2;
-              const centerY = rect.top + rect.height / 2;
-              const xPct = (e.clientX - centerX) / (rect.width / 2);
-              const yPct = (e.clientY - centerY) / (rect.height / 2);
-              mouseX.set(xPct);
-              mouseY.set(yPct);
-            };
-
-            const handleCardMouseLeave = () => {
-              mouseX.set(0);
-              mouseY.set(0);
-            };
-
-            return (
-              <motion.div
-                key={item.id}
-                ref={cardRef}
-                onMouseMove={handleCardMouseMove}
-                onMouseLeave={handleCardMouseLeave}
-                initial={{ opacity: 0, y: 50 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ delay: index * 0.1, duration: 0.6 }}
-                className="group relative bg-hotpot-charcoal-light rounded-3xl overflow-hidden hover:shadow-2xl transition-all duration-500"
-                style={{
-                  rotateX,
-                  rotateY,
-                  transformStyle: 'preserve-3d',
-                }}
-                whileHover={{ y: -10, scale: 1.02 }}
-              >
-              {/* Popular Badge */}
-              {item.popular && (
-                <div className="absolute top-4 right-4 z-20 bg-hotpot-red text-white px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg">
-                  Popular
-                </div>
-              )}
-
-              {/* Image Container with Gradient Overlay */}
-              <div className="relative h-64 overflow-hidden bg-gradient-to-br from-hotpot-charcoal to-hotpot-charcoal-light">
-                <div className="absolute inset-0 bg-gradient-to-t from-hotpot-charcoal via-transparent to-transparent z-10"></div>
-                <motion.div
-                  className="w-full h-full flex items-center justify-center text-6xl"
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  {/* Placeholder - Replace with actual images */}
-                  <div className="text-hotpot-orange opacity-50">🍲</div>
-                </motion.div>
-              </div>
-
-              {/* Content */}
-              <div className="p-6 relative">
-                <div className="flex justify-between items-start mb-3">
-                  <h3 className="text-2xl font-bold text-white group-hover:text-hotpot-orange transition-colors duration-300">
-                    {item.name}
-                  </h3>
-                  <span className="text-hotpot-orange text-xl font-bold whitespace-nowrap ml-4">
-                    {item.price}
-                  </span>
-                </div>
-                
-                <p className="text-gray-400 mb-4 text-sm leading-relaxed">
-                  {item.description}
-                </p>
-
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-hotpot-orange-light uppercase tracking-wider font-semibold">
-                    {item.category}
-                  </span>
-                  
-                  <motion.button
-                    onClick={() => addToCart(item)}
-                    className="bg-hotpot-orange text-white px-6 py-2 rounded-full text-sm font-semibold hover:bg-hotpot-red transition-colors duration-300 shadow-lg"
-                    whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(255, 122, 0, 0.6)' }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Add to Cart 🔥
-                  </motion.button>
-                </div>
-              </div>
-
-              {/* Hover Glow Effect */}
-              <motion.div
-                className="absolute inset-0 border-2 border-hotpot-orange opacity-0 group-hover:opacity-100 rounded-3xl pointer-events-none transition-opacity duration-500"
-                style={{ boxShadow: '0 0 30px rgba(255, 122, 0, 0.3)' }}
-              />
-            </motion.div>
-            );
-          })}
+          {filteredItems.map((item, index) => (
+            <MenuCard 
+              key={item.id} 
+              item={item} 
+              index={index} 
+              inView={inView} 
+              addToCart={addToCart}
+            />
+          ))}
         </div>
       </div>
     </section>
